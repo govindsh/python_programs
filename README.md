@@ -1,2 +1,3 @@
 # python_programs
-Python projects
+Python projects:
+1. Dice Simulator
