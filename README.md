@@ -1,4 +1,5 @@
 # python_programs
-Python projects:
-1. Dice Simulator
-2. Take a break
+<b> Python projects:</b><br>
+1. Dice Simulator <br>
+2. Take a break <br>
+3. Hangman <br>
