@@ -5,6 +5,16 @@ import logging
 import random
 import re
 import requests
+import time
+import os
+
+high_score_file = "high_score.txt"
+fh = open(high_score_file,'w+')
+if os.stat(high_score_file).st_size == 0:
+    print "**** Good Luck to set an high score ****"
+else:
+    print "Least time to find the word is " + fh.read() + " seconds"
+fh.close()
 
 # Function to display HANGMAN message
 def check_hangman(fail_count):
@@ -51,6 +61,25 @@ def draw_dashes_or_alphabet(of_type,word_length=None,index=None):
         word_print[index] = c
         if success == word_length:
             print "Congrats you found the word ---> " + correct_word
+            end_time = time.time()
+            print "You found the word in " + str(int(end_time - start_time)) + " seconds"
+            
+            if os.stat(high_score_file).st_size != 0:
+                # If file size is not zero, then some score already exists in the file.
+                fh = open(high_score_file,'r')
+                previous_score = fh.read()
+                fh.close()
+            
+                # Time taken to guess word is less than what is in file, then overwrite.
+                if int(previous_score) > (end_time - start_time):
+                    fh = open(high_score_file,'w')
+                    fh.write(str(int(end_time - start_time)))    
+                    fh.close()
+            else:
+                # No new scores yet
+                fh = open(high_score_file,'w')
+                fh.write(str(int(end_time - start_time)))
+                fh.close()   
             exit(0)
     
     if success != 0:
@@ -67,6 +96,7 @@ words = response.content.splitlines()
 # Log the word in a sample log file
 logging.basicConfig(filename='example.log',level=logging.DEBUG)
 correct_word = random.choice(words)
+correct_word = correct_word.lower()
 print "This is a " + str(len(correct_word)) + " letter word "
 
 # Draw initial hangman console
@@ -77,19 +107,29 @@ logging.info("Word to be guessed is " + correct_word)
 right_guess = False
 fail_count = 0
 wrong_guesses = []
+correct_guesses = []
 
-
+start_time = time.time()
 while right_guess == False:
     # Get input character
-    c = raw_input("\nEnter a alphabet:")
+    c = raw_input("Enter a alphabet:")
+    
+    if not c.isalpha():
+        print "This kind of input not allowed. Please enter a letter"
+        continue
+    
+    if c in correct_guesses:
+        print "You already guessed letter " + c + "! Keep guessing."
+        continue
     
     # Print the wrong Guesses to help the user
     if len(wrong_guesses) > 0:
         print "Wrong guesses so far " + str(wrong_guesses)
 
     # Check if the character entered is present in the string
-    if c in correct_word:
+    if c in correct_word.lower():
         # User regular expressions to get all index(es) if the character is present more than once
+        correct_guesses.append(c)
         iter_match = re.finditer(c,correct_word)
         for match in iter_match:
             print c + " found at position(s) " + str(match.start())
@@ -102,9 +142,29 @@ while right_guess == False:
             choice = raw_input("Have you guessed the word? (y/n)")
             if choice == "y":
                 word = raw_input("Enter the word: ")
-                if word == correct_word:
+                if word == correct_word.lower():
                     # Guessed the right word
                     print "Congrats you found the word ---> " + correct_word
+                    end_time = time.time()
+                    print "You found the word in " + str(int(end_time - start_time)) + " seconds"
+                    
+                    if os.stat(high_score_file).st_size != 0:
+                        # If file size is not zero, then some score already exists in the file.
+                        fh = open(high_score_file,'r')
+                        previous_score = fh.read()
+                        fh.close()
+                    
+                        # Time taken to guess word is less than what is in file, then overwrite.
+                        if int(previous_score) > (end_time - start_time):
+                            fh = open(high_score_file,'w')
+                            fh.write(str(int(end_time - start_time)))    
+                            fh.close()
+                    else:
+                        # No new scores yet
+                        fh = open(high_score_file,'w')
+                        fh.write(str(int(end_time - start_time)))
+                        fh.close()   
+                    exit(0)
                 else:
                     # Wrong word, so increment hangman fail count
                     print "Oops wrong, increasing fail count"
