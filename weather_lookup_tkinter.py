@@ -1,49 +1,65 @@
+# Weather Lookup GUI using Tkinter
+# Author - Srikkanth Govindaraajan
+
+#Python Imports
 from Tkinter import *
 import urllib2
 import json
 from ScrolledText import ScrolledText
 import tkMessageBox
 
+# Class 
 class App:
+    # Constructor
     def __init__(self,master):
         
+        # Create the Menu for the GUI
         menu = Menu(root)
         root.config(menu=menu)
         filemenu = Menu(menu)
         
+        # File Menu with Load location and exit options
         menu.add_cascade(label="File", menu=filemenu)
         filemenu.add_command(label="Load location",command=self.save_location)
         filemenu.add_separator()
         filemenu.add_command(label="Exit", command=master.quit)
         
+        # Help menu with 'about' option
         helpmenu = Menu(menu)
         menu.add_cascade(label="Help", menu=helpmenu)
         helpmenu.add_command(label="About...", command=self.about)
         
-        self.top_frame = Frame(master)
+        # We create three frames. Top, main, bottom frames. Some prefer grid manager.
+        self.top_frame = Frame(master,bg='#A9A7A6')
         self.top_frame.pack(side=TOP)
         
-        frame = Frame(master)
+        # Main frame
+        frame = Frame(master,bg='#B9B7B6')
         frame.pack(fill='y', expand=True)
         
-        self.bottom_frame = Frame(master)
+        # Bottom frame
+        self.bottom_frame = Frame(master,bg='#D5E3ED')
         self.bottom_frame.pack(side=BOTTOM)
         
+        # Help text to be displayed always
         help_label = Label(self.top_frame, text="*** If country is US, enter state abbreviation eg. CA, MA, OH.\nElse enter country name: eg. India, UK, Australia\n\n")
         help_label.pack(side=LEFT)
         
+        # Label and text box for entering State/country
         state_label = Label(frame,text="STATE / COUNTRY")
         state_label.pack(side=LEFT)
         
         self.state = Entry(frame)
         self.state.pack(side=LEFT)
         
+        # Label and text box for entering City
         city_label = Label(frame,text="CITY")
         city_label.pack(side=LEFT)
         
         self.city = Entry(frame)
         self.city.pack(side=LEFT)
         
+        # Create Radiobuttons. Another choice would be to use list box.
         R1 = Radiobutton(root, text="Geo Lookup", variable=var, value=1,command=self.show_options)
         R1.pack( anchor = W )
         
@@ -71,32 +87,38 @@ class App:
         R9 = Radiobutton(root, text="Historical weather", variable=var, value=9, command=self.show_label)
         R9.pack( anchor = W )
         
-        self.submit = Button(root,text="Submit",command=self.find_weather)
-        self.submit.pack(side=LEFT,padx=20,pady=10)
+        # Create three buttons
+        self.submit = Button(self.bottom_frame,text="Submit",command=self.find_weather)
+        self.submit.pack(side=LEFT)
         
-        self.save = Button(root,text="Save Location(s)",command=self.save_location)
-        self.save.pack(side=LEFT,padx=20,pady=10)
+        self.save = Button(self.bottom_frame,text="Save Location(s)",command=self.save_location)
+        self.save.pack(side=LEFT)
         
-        self.quit = Button(root,text="Quit",command=self.quit_program,)
-        self.quit.pack(side=LEFT,padx=20,pady=10)
+        self.quit = Button(self.bottom_frame,text="Quit",command=self.quit_program,)
+        self.quit.pack(side=LEFT)
         
+        # Label and text box for displaying output
         self.output_label = Label(self.bottom_frame,text="\n\nWeather output:")
-        self.output_label.pack(side=BOTTOM)
+        self.output_label.pack(side=LEFT)
         
-        self.output = ScrolledText(self.bottom_frame)
+        self.output = ScrolledText(self.bottom_frame,bg='#D66B54') # ScrolledText looks better. Can use Text as well.
         self.output['font'] = ('monaco','12')
      
     def show_label(self):
+        # Clear any other old labels
         self.clear_labels_and_text()
-        if var.get() == 4:
+        if var.get() == 4: # Alerts
+            # Display label related to alerts
             self.alert_label = Label(self.bottom_frame,text="**** This feature is only for United States ****")
             self.alert_label.pack(side=TOP)
-        elif var.get() == 9:
+        elif var.get() == 9: # Historical weather
+            # Display label related to historical weather
             self.note_label = Label(self.bottom_frame,text="NOTE: Year should be greater than 2000")
             self.note_label.pack(side=TOP)
         return
     
     def save_location(self):
+        # RFE
         tkMessageBox.showinfo("Note", "This feature has not been implemented yet")
         return
     
@@ -105,19 +127,24 @@ class App:
         return
     
     def about(self):
-    
+        # Just a note
         tkMessageBox.showinfo("About Weather lookup app", "This application is for demonstration purposes only. Not intended for commercial use.")
         return
     
     def clear_labels_and_text(self):
-        dummy=0
+        dummy=0 # dummy variable basically for NO OP
+        # We have different try-except blocks for different labels.
+        # The reason is - at any point of time only one or none of the labels / text fields
+        # would be displayed. Hence having one try-except will create problems.
         try:
+            # Clear the history date label and text box.
             self.history_date_label.pack_forget()
             self.history_date.pack_forget()
         except AttributeError:
-            dummy=1
+            dummy=1 # Do nothing basically
             
         try:
+            # Clear the labels and text boxes associated with the trip planner
             self.from_date.pack_forget()
             self.from_date_label.pack_forget()
           
@@ -127,29 +154,18 @@ class App:
                 dummy=1
         
         try:
+            # Clear the alert label for alters
             self.alert_label.pack_forget()
         except AttributeError:
             dummy=1
         
         try:
-            self.from_date.pack_forget()
-            self.from_date_label.pack_forget()
-            self.to_date.pack_forget()
-            self.to_date_label.pack_forget()
-        except AttributeError:
-            dummy=1
-        
-        try:
-            self.history_date.pack_forget()
-            self.history_date_label.pack_forget()
-        except AttributeError:
-            dummy=1
-        
-        try:
+            # Clear the note label associated with the historical weather
             self.note_label.pack_forget()
         except AttributeError:
             dummy=1
         
+        # Delete any output displayed in the textbox
         self.output.delete(1.0,END)
         
         return
@@ -158,7 +174,10 @@ class App:
     def show_options(self):
         dummy = 0
         if var.get() == 3: # Trip Planner
+            # Clear any other labels or input forms
             self.clear_labels_and_text()
+            
+            # Display options for trip planner
             self.from_date_label = Label(self.bottom_frame,text="Departure (MMDD):")
             self.from_date_label.pack(side=LEFT)
              
@@ -172,34 +191,45 @@ class App:
             self.to_date.pack(side=LEFT)
          
         elif var.get() == 9: # HIstorical Weather
+            # Clear any other labels or input forms
             self.clear_labels_and_text()
              
+            # Display options for HIstorical Weather
             self.history_date_label = Label(self.bottom_frame,text="Historical date (yyyymmdd)")
             self.history_date_label.pack(side=LEFT)
             self.history_date = Entry(self.bottom_frame)
             self.history_date.pack(side=LEFT)
         
         else:
+            # Clear any other labels or input forms
             self.clear_labels_and_text()
         return
     
     def find_weather(self):
+        # Clear any other labels or input forms
         self.clear_labels_and_text()
         
+        # If state or city is empty show error message
         if not self.state.get() or not self.city.get():
             tkMessageBox.showerror("Error","Please enter both Country/State and City")
             return
         
+        # Convert state / country to uppercase and replaces spaces with %20 for url construction
         state = self.state.get()
+        if ' ' in state:
+            state = re.sub(' ','%20',state)
         state = state.strip().upper()
         
+        # Replace spaces in city with %20 for url construction
         city = self.city.get()
         if ' ' in city:
             city = re.sub(' ','%20',city)
         city = city.strip().lower()
         
-        base_url = 'http://api.wunderground.com/api/'+ your_api_key + '/'
+        # Base URL with API key obtained from https://www.wunderground.com/weather
+        base_url = 'http://api.wunderground.com/api/' + your_api_key +'/'
         
+        # Assign url_suffix for each option
         if var.get() == 1:
             url_suffix = 'geolookup/conditions/q/' + state + '/' + city + '.json'
         
@@ -231,19 +261,24 @@ class App:
             url_suffix = 'history_' + history_date + '/q/' + state + '/' + city  + '.json'
         
         try:
+            # Send request and get parsed data
             url = base_url + url_suffix
             f = urllib2.urlopen(url)
             json_string = f.read()
             parsed_json = json.loads(json_string)
         except UnboundLocalError:
+            # Throw message if none of radiobuttons are selected.
             tkMessageBox.showerror("Invalid Input","Select one of the options")
             return
         
         self.output.delete(1.0,END)
         if var.get() == 1: # Geo Lookup
+            # Parse and send output
             try:
                 location = parsed_json['location']['city']
                 temp_f = parsed_json['current_observation']['temp_f']
+                if '%20' in state:
+                    state = re.sub('%20',' ',state)
                 self.output.text = "Temp for city - " + location + ", " + state + " in F is "+ str(temp_f)
             except KeyError:
                 self.output.text = "ERROR: please check your input!"
@@ -252,6 +287,7 @@ class App:
                 self.output.pack(side=BOTTOM)
         
         elif var.get() == 2: # Almanac
+            # Parse and send output
             try:
                 normal_high = parsed_json['almanac']['temp_high']['normal']['F']
                 record_high = parsed_json['almanac']['temp_high']['record']['F']
@@ -274,6 +310,7 @@ class App:
                 self.output.pack(side=BOTTOM)
 
         elif var.get() == 3: # Trip Planner
+            # Parse and send output
             try:
                 trip_title = parsed_json['trip']['title']
                 
@@ -313,6 +350,7 @@ class App:
                 self.output.pack(side=BOTTOM)
 
         elif var.get() == 4: # Alerts
+            # Parse and send output
             try:
                 alert_description = parsed_json['alerts'][0]['description']
                 alert_expires = parsed_json['alerts'][0]['expires']
@@ -322,11 +360,15 @@ class App:
                 
             except KeyError:
                 self.output.text = "ERROR: please check your input!"
+            except IndexError:
+                tkMessageBox.showerror("Error", "Alerts feature applicable only to states in US.")
+                self.output.text = "ERROR: state not within the US."
             finally:
                 self.output.insert(1.0,self.output.text)
                 self.output.pack(side=BOTTOM)
 
         elif var.get() == 5: # Astronomy
+            # Parse and send output
             try:
                 self.output.text = ("Current time ---> " + parsed_json['moon_phase']['current_time']['hour'] + ":" + parsed_json['moon_phase']['current_time']['minute']
                                     + "\nSunrise ---> " + parsed_json['moon_phase']['sunrise']['hour'] + ":" + parsed_json['moon_phase']['sunrise']['minute'] 
@@ -339,6 +381,7 @@ class App:
                 self.output.pack(side=BOTTOM)
 
         elif var.get() == 6: # Forecast
+            # Parse and send output
             self.output.text = "\n"
             try:
                 for i in range(0,8):
@@ -354,6 +397,7 @@ class App:
                 self.output.pack(side=BOTTOM)
 
         elif var.get() == 7: # 10DayForcast
+            # Parse and send output
             self.output.text = "\n"
             try:
                 for i in range(0,10):
@@ -383,6 +427,7 @@ class App:
                 self.output.pack(side=BOTTOM)
         
         elif var.get() == 8: # Yesterday weather
+            # Parse and send output
             try:
                 self.output.text = ("Date ---> " + parsed_json['history']['date']['pretty'] 
                                     + "\nTemperature ---> " + parsed_json['history']['observations'][0]['tempi'] + " F"
@@ -394,6 +439,7 @@ class App:
                 self.output.pack(side=BOTTOM)
         
         elif var.get() == 9: # Historical Weather
+            # Parse and send output
             try:
                 self.output.text = ("Date ---> " + parsed_json['history']['date']['pretty']
                                     + "\nTemperature ---> " + parsed_json['history']['observations'][0]['tempi'] + " F\n"
@@ -411,8 +457,10 @@ class App:
                 self.output.insert(1.0, self.output.text)
                 self.output.pack(side=BOTTOM)
 
+# Create app instance and run
 root = Tk()
 var = IntVar()
 root.wm_title("Weather Lookup")
 app = App(root)
+
 root.mainloop()
