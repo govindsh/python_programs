@@ -84,7 +84,7 @@ class App:
         R2 = Radiobutton(root, text="Almanac", variable=var, value=2,command=self.show_options)
         R2.pack( anchor = W )
         
-        R9 = Radiobutton(root, text="Historical weather", variable=var, value=9, command=self.show_label)
+        R9 = Radiobutton(root, text="Historical weather", variable=var, value=9, command=self.show_options)
         R9.pack( anchor = W )
         
         # Create three buttons
@@ -94,11 +94,11 @@ class App:
         self.save = Button(self.bottom_frame,text="Save Location(s)",command=self.save_location)
         self.save.pack(side=LEFT)
         
-        self.quit = Button(self.bottom_frame,text="Quit",command=self.quit_program,)
+        self.quit = Button(self.bottom_frame,text="Quit",command=self.quit_program)
         self.quit.pack(side=LEFT)
         
         # Label and text box for displaying output
-        self.output_label = Label(self.bottom_frame,text="\n\nWeather output:")
+        self.output_label = Label(self.bottom_frame,text="\n\n\nWeather output:")
         self.output_label.pack(side=LEFT)
         
         self.output = ScrolledText(self.bottom_frame,bg='#D66B54') # ScrolledText looks better. Can use Text as well.
@@ -111,10 +111,7 @@ class App:
             # Display label related to alerts
             self.alert_label = Label(self.bottom_frame,text="**** This feature is only for United States ****")
             self.alert_label.pack(side=TOP)
-        elif var.get() == 9: # Historical weather
-            # Display label related to historical weather
-            self.note_label = Label(self.bottom_frame,text="NOTE: Year should be greater than 2000")
-            self.note_label.pack(side=TOP)
+            
         return
     
     def save_location(self):
@@ -193,12 +190,16 @@ class App:
         elif var.get() == 9: # HIstorical Weather
             # Clear any other labels or input forms
             self.clear_labels_and_text()
-             
+            
+            self.note_label = Label(self.bottom_frame,text="NOTE: Year should be greater than 2000")
+            self.note_label.pack(side=TOP)
+            
             # Display options for HIstorical Weather
-            self.history_date_label = Label(self.bottom_frame,text="Historical date (yyyymmdd)")
-            self.history_date_label.pack(side=LEFT)
+            self.history_date_label = Label(self.bottom_frame,text="Historical date (yyyymmdd):")
+            self.history_date_label.pack(side=RIGHT)
+            
             self.history_date = Entry(self.bottom_frame)
-            self.history_date.pack(side=LEFT)
+            self.history_date.pack(side=RIGHT)
         
         else:
             # Clear any other labels or input forms
@@ -226,8 +227,8 @@ class App:
             city = re.sub(' ','%20',city)
         city = city.strip().lower()
         
-        # Base URL with API key obtained from https://www.wunderground.com/weather
-        base_url = 'http://api.wunderground.com/api/' + your_api_key +'/'
+        # Base URL with API key
+        base_url = 'http://api.wunderground.com/api/' + your_api_key + '/'
         
         # Assign url_suffix for each option
         if var.get() == 1:
