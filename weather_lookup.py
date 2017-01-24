@@ -3,8 +3,45 @@ import json
 import sys
 import re
 
-if len(sys.argv) != 3:
-    print "Usage python weatherlookup.py <State> <City>"
+def print_weather_lookup_type_menu():
+    print "Press:"
+    print "0. To display all options"
+    print "1. Geolookup"
+    print "2. Trip Planner"
+    print "3. Alerts"
+    print "4. Almanac"
+    print "5. Astronomy"
+    print "6. Forecast"
+    print "7. 10 Day forecast"
+    print "8. Yesterday weather"
+    print "9. Historical weather"
+    print "10. Exit"
+    
+    return
+
+def get_weather_lookup_type(option):
+    if option == 1:
+        return "geolookup"
+    elif option == 2:
+        return "planner"
+    elif option == 3:
+        return "alerts"
+    elif option == 4:
+        return "almanac"
+    elif option == 5:
+        return "astronomy"
+    elif option == 6:
+        return "forecast"
+    elif option == 7:
+        return "10day"
+    elif option == 8:
+        return "yesterday"
+    elif option == 9:
+        return "history"
+    elif option == 0:
+        return 0
+    else:
+        return -1
 
 def geolookup(parsed_json):
     location = parsed_json['location']['city']
@@ -46,13 +83,15 @@ def planner(parsed_json):
     return
 
 def alerts(parsed_json):
-    alert_description = parsed_json['alerts'][0]['description']
-    alert_expires = parsed_json['alerts'][0]['expires']
-    message = parsed_json['alerts'][0]['message']
-    
-    print "Alert ---> " + alert_description
-    print "Alert expires ---> " + alert_expires
-    print message
+    try:
+        alert_description = parsed_json['alerts'][0]['description']
+        alert_expires = parsed_json['alerts'][0]['expires']
+        message = parsed_json['alerts'][0]['message']
+        print "Alert ---> " + alert_description
+        print "Alert expires ---> " + alert_expires
+        print message
+    except IndexError:
+        print "No Alerts for " + city + " ," + state + " today!"
     return
 
 def almanac(parsed_json):
@@ -180,65 +219,86 @@ def fetch_details_for_weather_type_lookup(url,lookup_type):
         history(parsed_json)
         
     return
+print "********************************************"
+print "Weather Details Lookup\n"
+print "Author - Srikkanth Govindaraajan" 
+print "********************************************"
+print "Hint: If inside US, enter state abbreviation."
+print "If outside US, enter country name."
+state = raw_input("Enter the state / country:")
+city = raw_input("Enter city name:")
 
-weather_lookup_type = sys.argv[1]
-state = sys.argv[2]
-list_city = sys.argv[3]
-city = str(list_city)
-
-# Format city and state
-state=state.upper()
-weather_lookup_type = weather_lookup_type.lower()
-
-if ' ' in city:
-    city = re.sub(' ','%20',city)
-
-print "Weather lookup type ---> " + weather_lookup_type
-print "City is "+ city
-print "State is " + state
-
-
-base_url = 'http://api.wunderground.com/api/' + your_api_key + '/'
-
-if weather_lookup_type == "geolookup":
-    url_suffix = 'geolookup/conditions/q/' + state + '/' + city + '.json'
-
-elif weather_lookup_type == "planner":
-    from_date=raw_input("Enter the FROM date in format(MMDD) without spaces ---> ")
-    to_date=raw_input("Enter the TO date in format(MMDD) without spaces ---> ")
-    url_suffix = 'planner_' + from_date + to_date + '/q/' + state + '/' + city + '.json'
-
-elif weather_lookup_type == "alerts":
-    print "**** This feature is only for United States ****"
-    url_suffix = 'alerts/q/' + state + '/' + city + '.json'
-    print "Displaying Alerts for city " + city + " in state/country " + state
-
-elif weather_lookup_type == "almanac":
-    url_suffix = 'almanac/q/' + state + '/' + city + '.json'
-    print "Almanac for " + city + " in state/country " + state
-
-elif weather_lookup_type == "astronomy":
-    url_suffix = 'astronomy/q/' + state + '/' + city + '.json'
-    print "Sunrise & Sunset for " + city + " in state/country " + state
-
-elif weather_lookup_type == "forecast":
-    url_suffix = 'forecast/q/' + state + '/' + city + '.json'
-    print "Forecast for " + city + " in state/country " + state
-
-elif weather_lookup_type == "10day":
-    url_suffix = 'forecast10day/q/' + state + '/' + city + '.json'
-    print "10 Day Forecast for " + city + " in state/country " + state
-
-elif weather_lookup_type == "yesterday":
-    url_suffix = 'yesterday/q/' + state + '/' + city  + '.json'
-    print "Yesterday's weather for "+ city + " in state/country " + state
-
-elif weather_lookup_type == "history":
-    history_date = raw_input("Enter the date to search weather for: (Format: yyyymmdd) ---> ")
-    url_suffix = 'history_' + history_date + '/q/' + state + '/' + city  + '.json'
-    print "Historical weather for "+ city + " in state/country " + state
-
-else:
-    print "invalid option"
-
-fetch_details_for_weather_type_lookup(base_url+url_suffix,weather_lookup_type)
+print_weather_lookup_type_menu()
+bool = True
+while bool == True:
+    option = raw_input("Enter your choice: ")
+    weather_lookup_type = get_weather_lookup_type(int(option))
+    
+    if weather_lookup_type == 0:
+        print_weather_lookup_type_menu()
+        continue
+    
+    if weather_lookup_type == -1 and int(option) == 10:
+        bool = False
+        print "Thanks for using my weather lookup application"
+        continue
+    
+    # Format city and state
+    state=state.upper()
+    weather_lookup_type = weather_lookup_type.lower()
+    
+    if ' ' in city:
+        city = re.sub(' ','%20',city)
+    
+    if ' ' in state:
+        state = re.sub(' ','%20',state)
+    
+    print "Weather lookup type ---> " + weather_lookup_type
+    print "City is "+ city
+    print "State is " + state
+    
+    # Get your API Key at http://wunderground.com/api
+    base_url = 'http://api.wunderground.com/api/' + your_API_key + '/'
+    
+    if weather_lookup_type == "geolookup":
+        url_suffix = 'geolookup/conditions/q/' + state + '/' + city + '.json'
+    
+    elif weather_lookup_type == "planner":
+        from_date=raw_input("Enter the FROM date in format(MMDD) without spaces ---> ")
+        to_date=raw_input("Enter the TO date in format(MMDD) without spaces ---> ")
+        url_suffix = 'planner_' + from_date + to_date + '/q/' + state + '/' + city + '.json'
+    
+    elif weather_lookup_type == "alerts":
+        print "**** This feature is only for United States ****"
+        url_suffix = 'alerts/q/' + state + '/' + city + '.json'
+        print "Displaying Alerts for city " + city + " in state/country " + state
+    
+    elif weather_lookup_type == "almanac":
+        url_suffix = 'almanac/q/' + state + '/' + city + '.json'
+        print "Almanac for " + city + " in state/country " + state
+    
+    elif weather_lookup_type == "astronomy":
+        url_suffix = 'astronomy/q/' + state + '/' + city + '.json'
+        print "Sunrise & Sunset for " + city + " in state/country " + state
+    
+    elif weather_lookup_type == "forecast":
+        url_suffix = 'forecast/q/' + state + '/' + city + '.json'
+        print "Forecast for " + city + " in state/country " + state
+    
+    elif weather_lookup_type == "10day":
+        url_suffix = 'forecast10day/q/' + state + '/' + city + '.json'
+        print "10 Day Forecast for " + city + " in state/country " + state
+    
+    elif weather_lookup_type == "yesterday":
+        url_suffix = 'yesterday/q/' + state + '/' + city  + '.json'
+        print "Yesterday's weather for "+ city + " in state/country " + state
+    
+    elif weather_lookup_type == "history":
+        history_date = raw_input("Enter the date to search weather for: (Format: yyyymmdd) ---> ")
+        url_suffix = 'history_' + history_date + '/q/' + state + '/' + city  + '.json'
+        print "Historical weather for "+ city + " in state/country " + state
+    
+    else:
+        print "invalid option"
+    
+    fetch_details_for_weather_type_lookup(base_url+url_suffix,weather_lookup_type)
